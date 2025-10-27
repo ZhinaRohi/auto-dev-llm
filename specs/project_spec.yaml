@@ -1,0 +1,203 @@
+project_name: "auto-dev-llm"
+description: "سیستم خودکار توسعه‌دهنده با LLM"
+version: "0.1.0"
+
+# تنظیمات LLM
+llm:
+  mode: "mcp" # offline | online | mcp
+  offline_model:
+    name: "llama-3.1-7b-4bit"
+    path: "./models/llama-3.1-7b-4bit.gguf"
+  mcp:
+    api_url: "http://localhost:5005"
+    timeout: 300
+    retry: 3
+  online:
+    provider: "openai" # openai | anthropic
+    api_key_env: "OPENAI_API_KEY"
+    model: "gpt-4"
+  fallback_online: true
+
+# تنظیمات Scheduler
+scheduler:
+  active_hours:
+    start: 9
+    end: 18
+  max_concurrent_tasks: 2
+  check_interval: 60 # seconds
+  cpu_threshold: 80 # percent
+
+# تنظیمات Git
+git:
+  auto_commit: true
+  commit_message_template: "🤖 Auto: {feature_name} - {task_description}"
+  branch_pattern: "auto-dev/{feature_name}"
+  auto_push: false
+
+# تنظیمات Versioning
+versioning:
+  semantic_versioning: true
+  auto_bump: true
+  version_file: "VERSION"
+  rules:
+    major: ["breaking", "major"]
+    minor: ["feature", "feat"]
+    patch: ["fix", "patch", "refactor"]
+
+# تنظیمات Logging
+logging:
+  log_path: "./logs"
+  level: "INFO"
+  per_feature_log: true
+  rotation: "1 day"
+  retention: "30 days"
+
+# تنظیمات Rollback
+rollback:
+  enabled: true
+  backup_path: "./backups"
+  max_backups: 10
+  auto_rollback_on_error: true
+
+# تنظیمات Deploy
+deploy:
+  enabled: true
+  type: "canary" # canary | blue-green | rolling
+  canary:
+    stages:
+      - traffic: 10
+        duration: 300 # seconds
+      - traffic: 50
+        duration: 600
+      - traffic: 100
+        duration: 0
+  health_check:
+    endpoint: "/health"
+    interval: 30
+    timeout: 10
+    retries: 3
+
+# Features برای توسعه
+features:
+  - name: "core-setup"
+    priority: 1
+    description: "راه‌اندازی هسته اصلی سیستم"
+    tasks:
+      - name: "config-loader"
+        description: "خواندن و اعتبارسنجی project_spec.yaml"
+        files:
+          - "src/core/config.py"
+        tests:
+          - "tests/test_config.py"
+
+      - name: "logger-setup"
+        description: "سیستم logging پیشرفته"
+        files:
+          - "src/utils/logger.py"
+        tests:
+          - "tests/test_logger.py"
+
+  - name: "task-manager"
+    priority: 2
+    description: "مدیریت وظایف و صف"
+    tasks:
+      - name: "task-queue"
+        description: "صف وظایف با اولویت‌بندی"
+        files:
+          - "src/core/task_manager.py"
+        tests:
+          - "tests/test_task_manager.py"
+
+      - name: "task-state"
+        description: "مدیریت وضعیت tasks"
+        files:
+          - "src/core/task_state.py"
+        tests:
+          - "tests/test_task_state.py"
+
+  - name: "llm-integration"
+    priority: 3
+    description: "اتصال به LLM (MCP + Fallback)"
+    tasks:
+      - name: "mcp-client"
+        description: "کلاینت MCP Server"
+        files:
+          - "src/llm/mcp_client.py"
+        tests:
+          - "tests/test_mcp_client.py"
+
+      - name: "llm-wrapper"
+        description: "Wrapper یکپارچه برای همه LLMها"
+        files:
+          - "src/llm/llama_wrapper.py"
+        tests:
+          - "tests/test_llama_wrapper.py"
+
+      - name: "prompt-templates"
+        description: "قالب‌های prompt برای تولید کد"
+        files:
+          - "src/llm/prompt_templates.py"
+        tests:
+          - "tests/test_prompts.py"
+
+  - name: "orchestrator"
+    priority: 4
+    description: "هماهنگ‌کننده اصلی"
+    tasks:
+      - name: "main-orchestrator"
+        description: "کنترل جریان اصلی سیستم"
+        files:
+          - "src/core/orchestrator.py"
+        tests:
+          - "tests/test_orchestrator.py"
+
+  - name: "scheduler"
+    priority: 5
+    description: "زمان‌بندی و کنترل منابع"
+    tasks:
+      - name: "time-scheduler"
+        description: "کنترل ساعات کاری"
+        files:
+          - "src/managers/scheduler.py"
+        tests:
+          - "tests/test_scheduler.py"
+
+  - name: "version-control"
+    priority: 6
+    description: "مدیریت نسخه و Git"
+    tasks:
+      - name: "version-manager"
+        description: "Semantic versioning خودکار"
+        files:
+          - "src/managers/version_manager.py"
+        tests:
+          - "tests/test_version_manager.py"
+
+      - name: "git-automation"
+        description: "خودکارسازی Git operations"
+        files:
+          - "src/utils/git_utils.py"
+        tests:
+          - "tests/test_git_utils.py"
+
+  - name: "rollback-system"
+    priority: 7
+    description: "سیستم بازگشت و بازیابی"
+    tasks:
+      - name: "rollback-manager"
+        description: "مدیریت rollback خودکار"
+        files:
+          - "src/managers/rollback_manager.py"
+        tests:
+          - "tests/test_rollback_manager.py"
+
+  - name: "deploy-system"
+    priority: 8
+    description: "استقرار کاناری"
+    tasks:
+      - name: "deploy-manager"
+        description: "مدیریت deploy کاناری"
+        files:
+          - "src/managers/deploy_manager.py"
+        tests:
+          - "tests/test_deploy_manager.py"
