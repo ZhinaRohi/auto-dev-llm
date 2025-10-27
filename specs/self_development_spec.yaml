@@ -4,16 +4,59 @@ version: "0.2.0"
 
 # تنظیمات LLM
 llm:
-  mode: "online" # استفاده از Claude/GPT برای کیفیت بالا
+  mode: "online" # استفاده از API سفارشی
+
+  # تنظیمات API سفارشی
+  custom_api:
+    enabled: true
+    base_url: "https://api.avalai.ir/v1" # 🔧 آدرس سرور شما
+    api_key_env: "CUSTOM_API_KEY" # نام متغیر محیطی
+    model: "claude-sonnet-4-20250514" # Sonnet 4.5
+
+    # Headers سفارشی (اختیاری)
+    custom_headers:
+      "X-Custom-Header": "your-value"
+
+    # Endpoint paths (اختیاری - اگر متفاوت باشد)
+    endpoints:
+      chat: "/chat/completions" # برای OpenAI-compatible
+      # یا: "/messages" برای Anthropic-compatible
+
+  # تنظیمات پیش‌فرض برای fallback
   online:
-    provider: "anthropic"
-    api_key_env: "ANTHROPIC_API_KEY"
-    model: "claude-sonnet-4"
-  fallback_online: true
+    provider: "custom" # استفاده از custom API
+    api_key_env: "CUSTOM_API_KEY"
+    model: "claude-sonnet-4-20250514"
+
+    # تنظیمات درخواست
+    timeout: 300
+    retry: 3
+    max_tokens: 4096
+    temperature: 0.7
+
+    # Prompt caching برای کاهش هزینه
+    use_cache: true
+
+  # MCP به عنوان fallback ثانویه
   mcp:
     api_url: "http://localhost:5005"
     timeout: 300
-    retry: 3
+    retry: 2
+
+  # اولویت استفاده
+  fallback_online: false # فقط از custom API استفاده کن
+  fallback_to_mcp: false # در صورت خطا به MCP نرو
+
+# تنظیمات هزینه و محدودیت
+cost_control:
+  enabled: true
+  max_cost_per_task: 0.10 # دلار
+  max_total_cost: 2.00 # دلار
+  warn_threshold: 0.50 # هشدار در 50 سنت
+
+  # Token limits
+  max_input_tokens: 2000
+  max_output_tokens: 3000
 
 # تنظیمات Scheduler
 scheduler:
